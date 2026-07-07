@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import VideoTile from './VideoTile'
 import { MicIcon, CamIcon, LeaveIcon, SwitchCamIcon } from './Icons'
 
@@ -11,6 +12,23 @@ export default function CallView({
   active, code, status, tiles, muted, camOff, canSwitchCam, switchingCam,
   onLeave, onToggleMute, onToggleCam, onSwitchCamera,
 }) {
+  const [focusedId, setFocusedId] = useState(null)
+
+  // reset if focused tile disconnects
+  useEffect(() => {
+    if (focusedId && !tiles.find(t => t.id === focusedId)) setFocusedId(null)
+  }, [tiles, focusedId])
+
+  // reset on call end
+  useEffect(() => {
+    if (!active) setFocusedId(null)
+  }, [active])
+
+  const handleTap = id => setFocusedId(prev => prev === id ? null : id)
+
+  const focusedTile = focusedId ? tiles.find(t => t.id === focusedId) : null
+  const otherTiles = focusedId ? tiles.filter(t => t.id !== focusedId) : []
+
   return (
     <div className={`call-view${active ? ' active' : ''}`}>
       <div className="call-topbar">
@@ -21,11 +39,30 @@ export default function CallView({
         <div className="call-status">{status}</div>
       </div>
 
-      <div className="video-grid" style={{ gridTemplateColumns: `repeat(${gridCols(tiles.length)}, 1fr)` }}>
-        {tiles.map(t => (
-          <VideoTile key={t.id} {...t} />
-        ))}
-      </div>
+      {focusedTile ? (
+        <div className="focused-layout">
+          <div className="focused-main" onClick={() => handleTap(focusedTile.id)}>
+            <VideoTile {...focusedTile} focused />
+          </div>
+          {otherTiles.length > 0 && (
+            <div className="focused-strip">
+              {otherTiles.map(t => (
+                <div key={t.id} className="focused-thumb" onClick={() => handleTap(t.id)}>
+                  <VideoTile {...t} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="video-grid" style={{ gridTemplateColumns: `repeat(${gridCols(tiles.length)}, 1fr)` }}>
+          {tiles.map(t => (
+            <div key={t.id} className="grid-tile-wrap" onClick={() => handleTap(t.id)}>
+              <VideoTile {...t} />
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="controls">
         <button className={`ctrl-btn${muted ? ' off' : ''}`} onClick={onToggleMute} title="Mute">

@@ -1,5 +1,4 @@
-// Lightweight "who's online" directory backed by the artifact shared storage API.
-// Falls back to no-ops if window.storage isn't present (e.g. plain browser deploy).
+// room presence via shared storage, no-op without window.storage
 
 const hasStorage = () => typeof window !== 'undefined' && window.storage
 

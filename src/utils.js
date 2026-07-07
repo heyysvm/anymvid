@@ -1,10 +1,7 @@
 export const genCode = () => String(Math.floor(10000 + Math.random() * 90000))
 export const randSuffix = () => Math.random().toString(36).slice(2, 8)
 
-// STUN handles most networks. TURN (relay) is the fallback for strict corporate/carrier
-// NATs where a direct peer-to-peer path can't be punched through — without it, calls on
-// those networks would just silently fail to connect. These openrelay.metered.ca
-// credentials are a public, free TURN service commonly used for exactly this.
+// STUN + TURN fallback
 export const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
@@ -26,9 +23,7 @@ export const ICE_SERVERS = [
   },
 ]
 
-// Good defaults for a smooth call: 720p target (not 1080p, which just adds lag on
-// average upload speeds), capped at 30fps, with audio processing on so voices stay
-// clean instead of echoey/quiet.
+// 720p30, echo/noise cleanup
 export const getMediaConstraints = (facingMode = 'user') => ({
   video: {
     facingMode,

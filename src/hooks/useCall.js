@@ -2,14 +2,8 @@ import { useCallback, useRef, useState } from 'react'
 import Peer from 'peerjs'
 import { randSuffix, ICE_SERVERS, getMediaConstraints } from '../utils'
 
-// How this works (no external signaling server needed beyond PeerJS's own broker):
-// - The FIRST person in a room claims a Peer whose id IS the room code itself (the "host").
-// - Everyone after that gets id `${code}-${random}` and opens a data connection to the host.
-// - The host keeps the authoritative list of who's currently in the room and, the moment a
-//   new person connects, sends them that list over the data channel.
-// - The new person then calls (WebRTC media call) every id in that list. Existing members
-//   don't need to do anything proactively — they just answer incoming calls — which is what
-//   forms the full mesh without duplicate/colliding calls.
+// first joiner = host (peer id == room code), rest connect as guests
+// host sends member list via data channel, new guest dials everyone → full mesh
 
 export function useCall({ onToast }) {
   const [active, setActive] = useState(false)
@@ -30,8 +24,7 @@ export function useCall({ onToast }) {
   const memberSetRef = useRef(new Set()) // (host only) authoritative member ids
   const myDataConnRef = useRef(null) // (guest only) connection to host
 
-  // Capping bitrate avoids the sender flooding a weak uplink, which is the #1 cause of
-  // the stutter/freeze pattern people associate with laggy video calls.
+  // cap bitrate so weak uplinks don't stutter
   const capBitrate = useCallback(call => {
     try {
       const pc = call?.peerConnection
@@ -40,9 +33,9 @@ export function useCall({ onToast }) {
       if (!sender) return
       const params = sender.getParameters()
       if (!params.encodings) params.encodings = [{}]
-      params.encodings[0].maxBitrate = 1_200_000 // ~1.2 Mbps ceiling, plenty for 720p30
+      params.encodings[0].maxBitrate = 1_200_000 // 1.2Mbps
       sender.setParameters(params).catch(() => {})
-    } catch (e) { /* not fatal */ }
+    } catch (e) {}
   }, [])
 
   const updateStatus = useCallback(() => {
@@ -61,7 +54,7 @@ export function useCall({ onToast }) {
     setTiles(prev => prev.filter(t => t.id !== id))
   }, [])
 
-  // If the network path drops mid-call, try a redial instead of leaving the tile frozen.
+  // auto-redial on ICE drop
   const watchConnectionHealth = useCallback((call, remoteId, redial) => {
     const pc = call?.peerConnection
     if (!pc) return
@@ -125,7 +118,7 @@ export function useCall({ onToast }) {
     peer.on('connection', dataConn => {
       dataConn.on('open', () => {
         hostDataConnsRef.current.set(dataConn.peer, dataConn)
-        // Send the list as it stood BEFORE adding this guest, so they know who to dial.
+        // send existing members before adding this one
         dataConn.send({ type: 'members', members: Array.from(memberSetRef.current) })
         memberSetRef.current.add(dataConn.peer)
       })
@@ -185,20 +178,19 @@ export function useCall({ onToast }) {
       return
     }
 
-    // Detect whether switching front/rear camera is even possible on this device.
+    // multi-cam check
     try {
       const devices = await navigator.mediaDevices.enumerateDevices()
       const videoInputs = devices.filter(d => d.kind === 'videoinput')
       setCanSwitchCam(videoInputs.length > 1)
-    } catch (e) { /* not fatal */ }
+    } catch (e) {}
 
     setCode(roomCode)
     setActive(true)
     setStatus('connecting…')
     setTiles([{ id: 'me', stream: localStreamRef.current, label: 'You', mine: true }])
 
-    // Try to claim the room code itself as our id. If it's taken, someone is already
-    // hosting this room — fall back to joining as a guest instead.
+    // try claiming room id; if taken → join as guest
     const probe = new Peer(roomCode, { debug: 0, config: { iceServers: ICE_SERVERS } })
     let settled = false
 
@@ -237,7 +229,7 @@ export function useCall({ onToast }) {
       const newVideoTrack = newStream.getVideoTracks()[0]
       const oldVideoTrack = localStreamRef.current.getVideoTracks()[0]
 
-      // Swap the track on every live call so remote viewers seamlessly switch too.
+      // swap track on live calls
       mediaConnsRef.current.forEach(call => {
         const pc = call?.peerConnection
         if (!pc) return
@@ -253,7 +245,7 @@ export function useCall({ onToast }) {
       newVideoTrack.enabled = !camOff
       facingModeRef.current = nextFacing
 
-      // Refresh the local preview tile with the new track.
+      // refresh local preview
       addTile('me', localStreamRef.current, 'You', true)
     } catch (e) {
       onToast?.('Could not switch camera')

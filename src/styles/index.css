@@ -42,8 +42,7 @@ body{
   padding-right:calc(18px + env(safe-area-inset-right));
 }
 
-/* Desktop: give the app breathing room instead of a lone narrow column floating
-   in a wide viewport — a soft framed card on a bigger canvas. */
+/* desktop: card layout */
 @media (min-width:900px){
   body{
     display:flex;
@@ -174,19 +173,37 @@ body{
 .tile-label{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);
   padding:5px 10px;border-radius:9px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:6px;}
 
-/* Landscape phones / short viewports: video eats too much height in portrait aspect,
-   switch tiles to a wider ratio so controls stay reachable without scrolling. */
+/* grid tap */
+.grid-tile-wrap{cursor:pointer;transition:transform .15s ease;}
+.grid-tile-wrap:active{transform:scale(0.97);}
+
+/* focused mode */
+.focused-layout{flex:1;display:flex;flex-direction:column;min-height:0;padding:0 12px;gap:8px;animation:fadeIn .3s ease;}
+.focused-main{flex:1;min-height:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.focused-main .video-tile{width:100%;max-height:100%;aspect-ratio:16/9;min-height:0;}
+.video-tile.focused{border:2px solid var(--accent);box-shadow:0 0 24px var(--accent-soft);}
+.focused-strip{display:flex;gap:8px;overflow-x:auto;flex-shrink:0;padding:4px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.focused-strip::-webkit-scrollbar{display:none;}
+.focused-thumb{cursor:pointer;flex-shrink:0;transition:transform .15s ease;}
+.focused-thumb:active{transform:scale(0.94);}
+.focused-thumb .video-tile{width:100px;height:75px;aspect-ratio:auto;min-height:auto;max-height:none;border-radius:12px;}
+
+/* landscape phones */
 @media (max-height:480px) and (orientation:landscape){
   .video-tile{aspect-ratio:16/10;max-height:60svh;max-height:60vh;}
   .controls{padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom));}
   .call-topbar{padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:8px;}
+  .focused-main .video-tile{aspect-ratio:16/9;max-height:55svh;max-height:55vh;}
+  .focused-thumb .video-tile{width:90px;height:65px;}
 }
 
-/* Wide desktop calls: cap tile width so a 1-on-1 call isn't a giant stretched square,
-   and let the grid breathe with more columns for group calls. */
+/* wide desktop */
 @media (min-width:900px){
   .video-grid{padding:0 24px;}
   .video-tile{max-width:420px;max-height:60vh;}
+  .focused-layout{padding:0 24px;}
+  .focused-main .video-tile{max-width:900px;max-height:70vh;}
+  .focused-thumb .video-tile{width:140px;height:100px;border-radius:14px;}
 }
 
 .controls{
@@ -229,6 +246,7 @@ body{
   .code-display{font-size:36px;letter-spacing:7px;}
   .ctrl-btn{width:50px;height:50px;}
   .controls{gap:10px;}
+  .focused-thumb .video-tile{width:80px;height:60px;}
 }
 
 @media (max-width:340px){
