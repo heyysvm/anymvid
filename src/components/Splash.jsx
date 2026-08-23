@@ -13,11 +13,7 @@ export default function Splash({ onDone }) {
 
   return (
     <div className={`splash${gone ? ' gone' : ''}`}>
-      <div className="splash-content">
-        <span className="splash-dot" />
-        <span className="splash-title">anymvid</span>
-      </div>
-      <div className="splash-sub">anonymous video rooms</div>
+      <div className="splash-title">anymvid</div>
     </div>
   )
 }

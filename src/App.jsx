@@ -5,6 +5,7 @@ import Home from './components/Home'
 import ActiveRooms from './components/ActiveRooms'
 import CallView from './components/CallView'
 import Footer from './components/Footer'
+import GetIt from './components/GetIt'
 import Toast from './components/Toast'
 import { useCall } from './hooks/useCall'
 import { useToast } from './hooks/useToast'
@@ -31,6 +32,7 @@ export default function App() {
         <Home active={view === 'home'} onStart={handleJoin} onJoin={handleJoin} toast={toast} />
         <ActiveRooms active={view === 'active'} onJoin={handleJoin} />
 
+        <GetIt />
         <Footer />
 
         <CallView
