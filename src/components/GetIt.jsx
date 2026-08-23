@@ -31,8 +31,6 @@ export default function GetIt() {
   // hide when already installed
   if (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) return null
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-
   return (
     <div className="getit" ref={ref}>
       <button className="getit-trigger" onClick={() => setOpen(p => !p)}>Get it</button>
@@ -41,47 +39,37 @@ export default function GetIt() {
         <div className="getit-menu">
           <div className="getit-heading">Install anymvid</div>
 
-          {prompt ? (
-            <button className="getit-item clickable" onClick={install}>
-              <span>📲</span>
-              <div>
-                <div className="getit-name">Install now</div>
-                <div className="getit-desc">Add to your home screen</div>
-              </div>
-            </button>
-          ) : isIOS ? (
-            <div className="getit-item">
-              <span>🍎</span>
-              <div>
-                <div className="getit-name">iPhone / iPad</div>
-                <div className="getit-desc">Safari → Share ↗ → Add to Home Screen</div>
-              </div>
+          <div className="getit-item" onClick={prompt ? install : undefined} style={prompt ? {cursor:'pointer'} : undefined}>
+            <span>📱</span>
+            <div>
+              <div className="getit-name">Android</div>
+              <div className="getit-desc">{prompt ? 'Tap to install now' : 'Chrome → ⋮ → Add to Home screen'}</div>
             </div>
-          ) : (
-            <>
-              <div className="getit-item">
-                <span>🖥️</span>
-                <div>
-                  <div className="getit-name">Windows / Mac / Linux</div>
-                  <div className="getit-desc">Chrome → ⋮ → Install anymvid</div>
-                </div>
-              </div>
-              <div className="getit-item">
-                <span>📱</span>
-                <div>
-                  <div className="getit-name">Android</div>
-                  <div className="getit-desc">Chrome → ⋮ → Add to Home screen</div>
-                </div>
-              </div>
-              <div className="getit-item">
-                <span>🍎</span>
-                <div>
-                  <div className="getit-name">iPhone / iPad</div>
-                  <div className="getit-desc">Safari → Share ↗ → Add to Home Screen</div>
-                </div>
-              </div>
-            </>
-          )}
+          </div>
+
+          <div className="getit-item">
+            <span>🪟</span>
+            <div>
+              <div className="getit-name">Windows</div>
+              <div className="getit-desc">Chrome / Edge → ⋮ → Install anymvid</div>
+            </div>
+          </div>
+
+          <div className="getit-item">
+            <span>🍎</span>
+            <div>
+              <div className="getit-name">Mac</div>
+              <div className="getit-desc">Chrome → ⋮ → Install anymvid</div>
+            </div>
+          </div>
+
+          <div className="getit-item">
+            <span>📲</span>
+            <div>
+              <div className="getit-name">iPhone / iPad</div>
+              <div className="getit-desc">Safari → Share ↗ → Add to Home Screen</div>
+            </div>
+          </div>
 
           <div className="getit-note">Works offline like a native app</div>
         </div>
