@@ -12,7 +12,7 @@ export default function Footer() {
           <GlobeIcon />
           <span>heyysvm.in</span>
         </a>
-        <a className="footer-link" href="https://github.com/heyyvm/anymvid" target="_blank" rel="noopener noreferrer">
+        <a className="footer-link" href="https://github.com/heyysvm/anymvid" target="_blank" rel="noopener noreferrer">
           <GithubIcon />
           <span>anymvid</span>
         </a>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Splash from './components/Splash'
 import TopBar from './components/TopBar'
 import Home from './components/Home'
 import ActiveRooms from './components/ActiveRooms'
@@ -9,6 +10,7 @@ import { useCall } from './hooks/useCall'
 import { useToast } from './hooks/useToast'
 
 export default function App() {
+  const [ready, setReady] = useState(false)
   const [view, setView] = useState('home')
   const { message, show, toast } = useToast()
   const call = useCall({ onToast: toast })
@@ -21,30 +23,33 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <TopBar view={view} setView={setView} />
+    <>
+      {!ready && <Splash onDone={() => setReady(true)} />}
+      <div className="app">
+        <TopBar view={view} setView={setView} />
 
-      <Home active={view === 'home'} onStart={handleJoin} onJoin={handleJoin} toast={toast} />
-      <ActiveRooms active={view === 'active'} onJoin={handleJoin} />
+        <Home active={view === 'home'} onStart={handleJoin} onJoin={handleJoin} toast={toast} />
+        <ActiveRooms active={view === 'active'} onJoin={handleJoin} />
 
-      <Footer />
+        <Footer />
 
-      <CallView
-        active={call.active}
-        code={call.code}
-        status={call.status}
-        tiles={call.tiles}
-        muted={call.muted}
-        camOff={call.camOff}
-        canSwitchCam={call.canSwitchCam}
-        switchingCam={call.switchingCam}
-        onLeave={handleLeave}
-        onToggleMute={call.toggleMute}
-        onToggleCam={call.toggleCam}
-        onSwitchCamera={call.switchCamera}
-      />
+        <CallView
+          active={call.active}
+          code={call.code}
+          status={call.status}
+          tiles={call.tiles}
+          muted={call.muted}
+          camOff={call.camOff}
+          canSwitchCam={call.canSwitchCam}
+          switchingCam={call.switchingCam}
+          onLeave={handleLeave}
+          onToggleMute={call.toggleMute}
+          onToggleCam={call.toggleCam}
+          onSwitchCamera={call.switchCamera}
+        />
 
-      <Toast message={message} show={show} />
-    </div>
+        <Toast message={message} show={show} />
+      </div>
+    </>
   )
 }

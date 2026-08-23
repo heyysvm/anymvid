@@ -5,9 +5,7 @@ export default function Home({ active, onStart, onJoin, toast }) {
   const [myCode, setMyCode] = useState(genCode())
   const [joinValue, setJoinValue] = useState('')
 
-  const handleStart = () => {
-    onStart(myCode)
-  }
+  const handleStart = () => onStart(myCode)
 
   const handleJoin = () => {
     if (joinValue.trim().length !== 5) {
@@ -17,17 +15,19 @@ export default function Home({ active, onStart, onJoin, toast }) {
     onJoin(joinValue.trim())
   }
 
+  const handleKeyDown = e => {
+    if (e.key === 'Enter') handleJoin()
+  }
+
   return (
     <div className={`view${active ? ' active' : ''}`}>
       <div className="hero">
-        <h1>Talk to anyone, anonymously.</h1>
+        <h1>Talk to anyone,<br />anonymously.</h1>
         <p>No sign up. No names. Just a 5-digit code.</p>
       </div>
 
       <div className="card code-card">
-        <div style={{ fontSize: 12, color: 'var(--text-dim)', textAlign: 'center', marginBottom: 4 }}>
-          Your room code
-        </div>
+        <div className="code-label">Your room code</div>
         <div className="code-display">{myCode}</div>
         <button className="btn btn-primary" onClick={handleStart}>
           Start a room
@@ -43,6 +43,7 @@ export default function Home({ active, onStart, onJoin, toast }) {
             placeholder="00000"
             value={joinValue}
             onChange={e => setJoinValue(e.target.value.replace(/\D/g, '').slice(0, 5))}
+            onKeyDown={handleKeyDown}
           />
           <button className="btn btn-ghost" onClick={handleJoin}>
             Join
